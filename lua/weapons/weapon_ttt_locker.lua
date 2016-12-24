@@ -2,14 +2,6 @@ if SERVER then
     AddCSLuaFile() 
 end
  
---[[
-**Problems: None.
- 
-**TODO: Maybe try again with the convars?
- 
-**V: 8/4
-]]--
- 
 if CLIENT then
     SWEP.PrintName = "Door Locker"
     SWEP.Slot = 7
@@ -83,7 +75,7 @@ function SWEP:PrimaryAttack()
                         self:TakePrimaryAmmo(1)
                        
                         if SERVER then
-                                door:SetNWString("DoorOwner", self.Owner) -- Sets the locker of that specific door
+                                door:SetNWEntity("DoorOwner", self.Owner) -- Sets the locker of that specific door
                                 door:EmitSound( "doors/door_metal_medium_close1.wav" )
                                 door:Fire("lock", "", 0)
                                 door:SetNWBool("TTTLocked", true)
@@ -99,8 +91,8 @@ function SWEP:PrimaryAttack()
                                                 door:Fire( "unlock", "", 0 )
                                                 door:EmitSound( "doors/door1_move.wav" )
                                                 door:SetNWBool("TTTLocked", false)
-                                                door:SetNWString("DoorOwner", nil)
-                                                CustomMsg(door:GetNWString("DoorOwner"), "One of your doors has unlocked due to time!", Color(255,255,0))
+                                                door:SetNWEntity("DoorOwner", nil)
+                                                CustomMsg(door:GetNWEntity("DoorOwner"), "One of your doors has unlocked due to time!", Color(255,255,0))
                                                 timer.Destroy(door:EntIndex() .. "DoorLockedTime")
                                         end)
                                 end
@@ -130,7 +122,7 @@ function SWEP:SecondaryAttack()
         local door = trace.Entity
        
         if (door:GetNWBool("TTTLocked") == true and DCheck( door, self.Owner ) ) then
-                local locker = door:GetNWString("DoorOwner")
+                local locker = door:GetNWEntity("DoorOwner")
                 local wannabe = self.Owner
                
                 if SERVER then
@@ -162,7 +154,7 @@ function SWEP:DrawHUD()
         if door:GetNWBool("TTTLocked") then
                         local timeleft = math.Clamp(  door:GetNWFloat("LockedUntil", 0)-CurTime(), 0, self.LockTime  )
                         local timeleft = math.Round(timeleft,1)
-                        local owner = door:GetNWString("DoorOwner")
+                        local owner = door:GetNWEntity("DoorOwner")
                         local dhealth = door:GetNWInt(door:EntIndex() .. "_health")
                         local dhealth = math.Clamp(dhealth, 0, self.DoorHealth)
                         self.DrawCrosshair = false -- Hides the crosshair to make things look neater
@@ -230,7 +222,7 @@ if SERVER then
                         prop:SetNWInt(prop:EntIndex() .. "_health", doorhealth - dmgtaken)
                        
                         if prop:GetNWInt(prop:EntIndex() .. "_health") <= 1 then
-                                local d_own = prop:GetNWString("DoorOwner")
+                                local d_own = prop:GetNWEntity("DoorOwner")
                                 if not IsPlayer(dmginfo:GetAttacker()) then -- Damage log stuff
                                         CustomMsg(d_own, "One of your doors has been destroyed!", Color(255,0,0))
                                         DamageLog(d_own:Nick() .. "'s door has been destroyed")
@@ -275,7 +267,7 @@ hook.Add("TTTPrepareRound", "FixAllYallDoors",function()
                 if f == "prop_door_rotating" then
                         print("[Debug]: All doors reset" )
                         f:SetNWBool("TTTLocked", false)
-                        f:SetNWString("DoorOwner", nil)
+                        f:SetNWEntity("DoorOwner", nil)
                         f:SetNWFloat("LockedUntil", nil)
                         timer.Destroy(f:EntIndex() .. "DoorLockedTime")
                 end
